@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>动物园九型人格测试 · 测测你是哪种动物人格</title>
+<style>
+  :root{
+    --bg1:#fdf6ec; --bg2:#f6e7d7; --card:#ffffff; --ink:#3a2f28;
+    --sub:#8a7a6b; --accent:#e8903a; --radius:20px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    color:var(--ink);min-height:100vh;display:flex;justify-content:center;
+  }
+  .app{width:100%;max-width:480px;min-height:100vh;position:relative;overflow:hidden;background:linear-gradient(160deg,var(--bg1),var(--bg2));box-shadow:0 0 40px rgba(0,0,0,.06)}
+  .screen{display:none;padding:24px 20px 40px;min-height:100vh;flex-direction:column}
+  .screen.active{display:flex;animation:fadeIn .35s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* ---------- 开始页 ---------- */
+  .start-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .zoo-ring{position:relative;width:230px;height:230px;margin-bottom:26px}
+  .zoo-ring .orbit{position:absolute;inset:0;animation:spin 24s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .zoo-ring .orbit span{position:absolute;width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:0 6px 14px rgba(120,80,40,.18);display:flex;align-items:center;justify-content:center;font-size:26px}
+  .zoo-ring .core{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:120px;height:120px;border-radius:50%;background:#fff;box-shadow:0 10px 26px rgba(120,80,40,.2);display:flex;align-items:center;justify-content:center;font-size:56px}
+  h1.title{font-size:30px;font-weight:800;letter-spacing:2px}
+  .title .hl{color:var(--accent)}
+  .subtitle{margin-top:10px;color:var(--sub);font-size:14px;line-height:1.8;max-width:320px}
+  .meta-chips{display:flex;gap:10px;margin:22px 0 30px;flex-wrap:wrap;justify-content:center}
+  .chip{background:#fff;border:1px solid #eadcce;border-radius:999px;padding:7px 14px;font-size:13px;color:#6f5c4a}
+  .btn{display:block;width:100%;border:none;border-radius:999px;padding:17px;font-size:18px;font-weight:700;color:#fff;background:linear-gradient(135deg,#f2a154,#e8783a);box-shadow:0 10px 24px rgba(232,120,58,.35);cursor:pointer;transition:transform .15s}
+  .btn:active{transform:scale(.97)}
+  .btn.ghost{background:#fff;color:#c07b3e;border:1.5px solid #ecc9a3;box-shadow:none}
+  .start-note{margin-top:14px;font-size:12px;color:#a8988a}
+
+  /* ---------- 封面页（素材生成用） ---------- */
+  body.shot *{animation:none!important;transition:none!important}
+  .cover-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 14px}
+  .cover-title{font-size:34px;font-weight:900;letter-spacing:3px;line-height:1.3}
+  .cover-sub{margin-top:10px;font-size:16px;color:#8a7a6b;letter-spacing:2px}
+  .cover-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0 20px;width:100%;max-width:420px}
+  .cover-cell{background:#fff;border-radius:22px;padding:12px 6px 10px;box-shadow:0 8px 18px rgba(120,80,40,.12);display:flex;flex-direction:column;align-items:center;gap:2px}
+  .cover-cell svg{width:56px;height:56px}
+  .cover-cell .cn{font-size:13px;font-weight:800;color:#3a2f28}
+  .cover-cell .ce{font-size:15px;line-height:1.3}
+  .cover-foot{font-size:15px;color:#b06a2c;font-weight:700;letter-spacing:1px}
+
+  /* ---------- 答题页 ---------- */
+  .quiz-top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .quiz-top .qno{font-size:14px;color:var(--sub);font-weight:600;white-space:nowrap}
+  .bar{flex:1;height:10px;background:#fff;border-radius:999px;overflow:hidden;border:1px solid #eadcce}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f2a154,#e8783a);border-radius:999px;transition:width .35s ease}
+  .question{font-size:21px;font-weight:800;line-height:1.6;margin:8px 2px 22px}
+  .opts{display:flex;flex-direction:column;gap:12px}
+  .opt{background:var(--card);border:1.5px solid #eadcce;border-radius:var(--radius);padding:16px 18px;font-size:15.5px;line-height:1.55;cursor:pointer;transition:all .15s;text-align:left;color:var(--ink)}
+  .opt:active{background:#fff4e6;border-color:var(--accent);transform:scale(.98)}
+  .opt .key{display:inline-flex;width:24px;height:24px;border-radius:8px;background:#f7e8d4;color:#b06a2c;font-size:13px;font-weight:700;align-items:center;justify-content:center;margin-right:10px;vertical-align:middle}
+
+  /* ---------- 结果页 ---------- */
+  .result-wrap{flex:1;display:flex;flex-direction:column;align-items:center}
+  .result-tag{font-size:13px;color:var(--sub);letter-spacing:4px;margin-top:6px}
+  .avatar-box{width:190px;height:190px;border-radius:50%;background:#fff;box-shadow:0 14px 30px rgba(120,80,40,.18);display:flex;align-items:center;justify-content:center;margin:20px 0 14px;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+  .avatar-box svg{width:150px;height:150px}
+  .animal-name{font-size:32px;font-weight:900;letter-spacing:2px}
+  .persona{margin-top:6px;font-size:16px;color:#b06a2c;font-weight:700}
+  .enne{margin-top:10px;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #eadcce;border-radius:999px;padding:7px 16px;font-size:13px;color:#6f5c4a;font-weight:600}
+  .slogan{margin-top:18px;text-align:center;font-size:19px;font-weight:800;line-height:1.6;padding:0 8px}
+  .tags{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap;justify-content:center}
+  .tag{background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;color:#6f5c4a;border:1px solid #eadcce}
+  .card{background:var(--card);border-radius:var(--radius);padding:18px;width:100%;box-shadow:0 6px 18px rgba(120,80,40,.08);margin-bottom:14px}
+  .card h3{font-size:14px;color:#b06a2c;letter-spacing:2px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .card p{font-size:14.5px;line-height:1.8;color:#5c4d40}
+  .card b{color:var(--ink)}
+  .cp-row{display:flex;align-items:center;gap:12px}
+  .cp-row .mini{width:56px;height:56px;border-radius:50%;background:#f7e8d4;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .cp-row .mini svg{width:42px;height:42px}
+  .btn-row{display:flex;gap:10px;width:100%;margin-top:8px}
+  .btn-row .btn{flex:1;padding:14px;font-size:15.5px}
+  .hidden-canvas{position:fixed;left:-9999px;top:0}
+  .foot-note{margin-top:16px;font-size:11.5px;color:#a8988a;text-align:center;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 封面页（仅用于生成素材：?demo=cover） -->
+  <section class="screen" id="screen-cover">
+    <div class="cover-wrap">
+      <div class="cover-title">动物园九型人格测试</div>
+      <div class="cover-sub">32 道题 · 测出你的动物人格</div>
+      <div class="cover-grid" id="cover-grid"></div>
+      <div class="cover-foot">🐾 你是动物园里的谁？</div>
+    </div>
+  </section>
+
+  <!-- 开始页 -->
+  <section class="screen active" id="screen-start">
+    <div class="start-wrap">
+      <div class="zoo-ring">
+        <div class="orbit" id="orbit"></div>
+        <div class="core">🦓</div>
+      </div>
+      <h1 class="title">动物园<span class="hl">九型人格</span>测试</h1>
+      <p class="subtitle">如果性格有 habitat，你会住在动物园的哪个馆？<br>32 道题，测出你的「动物人格」，看清你的天赋与盲点。</p>
+      <div class="meta-chips">
+        <span class="chip">⏱ 约 4 分钟</span>
+        <span class="chip">📋 32 道情境题</span>
+        <span class="chip">🖼 每只动物都有专属海报</span>
+      </div>
+      <button class="btn" onclick="startQuiz()">进入动物园 →</button>
+      <p class="start-note">基于经典九型人格（Enneagram）模型 · 纯趣味测试</p>
+    </div>
+  </section>
+
+  <!-- 答题页 -->
+  <section class="screen" id="screen-quiz">
+    <div class="quiz-top">
+      <span class="qno" id="qno">1 / 16</span>
+      <div class="bar"><i id="bar-fill"></i></div>
+    </div>
+    <div class="question" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+  </section>
+
+  <!-- 结果页 -->
+  <section class="screen" id="screen-result">
+    <div class="result-wrap">
+      <span class="result-tag">YOUR ZOO PERSONA</span>
+      <div class="avatar-box" id="r-avatar"></div>
+      <div class="animal-name" id="r-name"></div>
+      <div class="persona" id="r-persona"></div>
+      <div class="enne" id="r-enne"></div>
+      <div class="slogan" id="r-slogan"></div>
+      <div class="tags" id="r-tags"></div>
+      <div class="card">
+        <h3>🔍 人格解码</h3>
+        <p id="r-desc"></p>
+      </div>
+      <div class="card">
+        <h3>✨ 天赋高光</h3>
+        <p id="r-strength"></p>
+      </div>
+      <div class="card">
+        <h3>🌀 隐藏盲点</h3>
+        <p id="r-blind"></p>
+      </div>
+      <div class="card">
+        <h3>🧭 给你的一句话</h3>
+        <p id="r-advice"></p>
+      </div>
+      <div class="card">
+        <h3>💞 天选动物 CP</h3>
+        <div class="cp-row">
+          <div class="mini" id="r-cp-avatar"></div>
+          <p id="r-cp"></p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🫥 隐藏副人格</h3>
+        <p id="r-sub"></p>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost" onclick="location.reload()">再测一次</button>
+        <button class="btn" onclick="savePoster()">保存结果海报 🖼</button>
+      </div>
+      <p class="foot-note">长按 / 截图你的结果页，配文发出去，看看朋友圈里谁和你是同款动物 👀<br>纯趣味测试，别拿它招聘哦</p>
+    </div>
+  </section>
+
+  <canvas class="hidden-canvas" id="poster" width="900" height="1600"></canvas>
+</div>
+
+<script>
+/* ================= 动物 SVG（扁平拟人风） ================= */
+const S = (inner) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${inner}</svg>`;
+const ANIMAL_SVG = {
+  1: S(`<circle cx="50" cy="54" r="37" fill="#333a4d"/><ellipse cx="50" cy="62" rx="23" ry="25" fill="#ffffff"/><circle cx="40" cy="48" r="5" fill="#22222e"/><circle cx="60" cy="48" r="5" fill="#22222e"/><path d="M44 56 L56 56 L50 66 Z" fill="#f5a623"/><circle cx="31" cy="58" r="4.5" fill="#f77f7f" opacity=".55"/><circle cx="69" cy="58" r="4.5" fill="#f77f7f" opacity=".55"/>`),
+  2: S(`<circle cx="50" cy="58" r="31" fill="#8db9dc"/><ellipse cx="50" cy="27" rx="13" ry="9" fill="#6a9cc4"/><circle cx="38" cy="52" r="5" fill="#22303c"/><circle cx="62" cy="52" r="5" fill="#22303c"/><ellipse cx="50" cy="72" rx="17" ry="11" fill="#a7c8e3"/><path d="M40 71 Q50 80 60 71" stroke="#3f6d92" fill="none" stroke-width="3" stroke-linecap="round"/><circle cx="30" cy="62" r="4" fill="#f9a7b0" opacity=".6"/><circle cx="70" cy="62" r="4" fill="#f9a7b0" opacity=".6"/>`),
+  3: S(`<circle cx="50" cy="76" r="22" fill="#3cb7ae"/><circle cx="50" cy="48" r="26" fill="#2ea6a0"/><line x1="42" y1="25" x2="38" y2="13" stroke="#2ea6a0" stroke-width="3"/><line x1="50" y1="24" x2="50" y2="11" stroke="#2ea6a0" stroke-width="3"/><line x1="58" y1="25" x2="62" y2="13" stroke="#2ea6a0" stroke-width="3"/><circle cx="38" cy="12" r="4" fill="#5fc9c4"/><circle cx="50" cy="10" r="4" fill="#5fc9c4"/><circle cx="62" cy="12" r="4" fill="#5fc9c4"/><circle cx="42" cy="46" r="5" fill="#0e3c3a"/><circle cx="58" cy="46" r="5" fill="#0e3c3a"/><path d="M44 56 L58 56 L51 65 Z" fill="#f0b23e"/><circle cx="34" cy="58" r="4" fill="#f9a7b0" opacity=".55"/><circle cx="66" cy="58" r="4" fill="#f9a7b0" opacity=".55"/>`),
+  4: S(`<path d="M50 92 Q28 74 38 52 Q44 38 56 32" stroke="#f48fb1" stroke-width="15" fill="none" stroke-linecap="round"/><circle cx="57" cy="31" r="13" fill="#f48fb1"/><path d="M67 28 Q82 27 84 34 L64 40 Z" fill="#f6c1cf"/><path d="M76 29 Q84 30 84 34 L74 36 Z" fill="#3a3a3a"/><circle cx="55" cy="28" r="3.6" fill="#5a2b45"/><circle cx="33" cy="62" r="4" fill="#f9a7b0" opacity=".5"/>`),
+  5: S(`<path d="M24 32 L18 13 L38 24 Z" fill="#6d4f3f"/><path d="M76 32 L82 13 L62 24 Z" fill="#6d4f3f"/><circle cx="50" cy="54" r="36" fill="#8d6e5b"/><circle cx="36" cy="52" r="16" fill="#c9a97f"/><circle cx="64" cy="52" r="16" fill="#c9a97f"/><circle cx="36" cy="52" r="9" fill="#ffffff"/><circle cx="64" cy="52" r="9" fill="#ffffff"/><circle cx="36" cy="52" r="5" fill="#2b2b2b"/><circle cx="64" cy="52" r="5" fill="#2b2b2b"/><path d="M45 60 L55 60 L50 70 Z" fill="#f0a13e"/>`),
+  6: S(`<circle cx="27" cy="33" r="7" fill="#a5824c"/><circle cx="73" cy="33" r="7" fill="#a5824c"/><circle cx="50" cy="56" r="31" fill="#c8a165"/><ellipse cx="38" cy="50" rx="10" ry="8" fill="#5b4630"/><ellipse cx="62" cy="50" rx="10" ry="8" fill="#5b4630"/><circle cx="38" cy="50" r="4" fill="#17120d"/><circle cx="62" cy="50" r="4" fill="#17120d"/><circle cx="50" cy="63" r="5.5" fill="#3c2f22"/><path d="M43 73 Q50 78 57 73" stroke="#6d5638" fill="none" stroke-width="3" stroke-linecap="round"/>`),
+  7: S(`<circle cx="17" cy="47" r="10" fill="#9b6a43"/><circle cx="83" cy="47" r="10" fill="#9b6a43"/><circle cx="17" cy="47" r="5" fill="#e7b78f"/><circle cx="83" cy="47" r="5" fill="#e7b78f"/><circle cx="50" cy="52" r="34" fill="#9b6a43"/><circle cx="50" cy="59" r="24" fill="#e6c8a0"/><circle cx="41" cy="49" r="4.5" fill="#2b1c10"/><circle cx="59" cy="49" r="4.5" fill="#2b1c10"/><circle cx="46" cy="66" r="2" fill="#7a5233"/><circle cx="54" cy="66" r="2" fill="#7a5233"/><path d="M42 72 Q50 79 58 72" stroke="#7a5233" fill="none" stroke-width="3" stroke-linecap="round"/>`),
+  8: S(`<circle cx="50" cy="52" r="41" fill="#e8903a"/><circle cx="26" cy="27" r="10" fill="#e8903a"/><circle cx="74" cy="27" r="10" fill="#e8903a"/><circle cx="26" cy="27" r="5" fill="#f5c07a"/><circle cx="74" cy="27" r="5" fill="#f5c07a"/><circle cx="50" cy="55" r="28" fill="#f5c07a"/><circle cx="40" cy="50" r="4.5" fill="#3a2413"/><circle cx="60" cy="50" r="4.5" fill="#3a2413"/><path d="M45 61 L55 61 L50 68 Z" fill="#8a5a2b"/><path d="M42 72 Q50 78 58 72" stroke="#8a5a2b" fill="none" stroke-width="3" stroke-linecap="round"/>`),
+  9: S(`<circle cx="27" cy="30" r="7" fill="#8a6444"/><circle cx="73" cy="30" r="7" fill="#8a6444"/><circle cx="50" cy="56" r="34" fill="#a9805b"/><ellipse cx="50" cy="70" rx="19" ry="13" fill="#c19a72"/><path d="M33 48 q6 6 12 0" stroke="#3a2a1c" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M55 48 q6 6 12 0" stroke="#3a2a1c" stroke-width="3.5" fill="none" stroke-linecap="round"/><ellipse cx="44" cy="66" rx="4" ry="3" fill="#3a2a1c"/><ellipse cx="56" cy="66" rx="4" ry="3" fill="#3a2a1c"/><path d="M46 76 Q50 79 54 76" stroke="#6d5138" fill="none" stroke-width="2.6" stroke-linecap="round"/>`)
+};
+
+/* ================= 结果档案（贴合九型人格模型） ================= */
+const RESULTS = {
+  1:{ name:"企鹅人格", persona:"黑白分明的秩序家", enne:"九型人格 · 1号 完美型/改革者", color:"#4a5878",
+      slogan:"「不是我有洁癖，是世界配不上我的标准。」",
+      tags:["原则性强","靠谱天花板","自我要求严格","细节控"],
+      desc:"你是动物园里的<b>企鹅馆馆长</b>：站姿标准、队列整齐、羽毛一尘不染。1号人格的你心里住着一把「正确」的尺子——什么事该怎么做、做到几分才算好，你全都有数。别人觉得你自律，其实你只是<b>无法容忍敷衍</b>。",
+      strength:"执行力与可信度双高。答应的事一定办到，交出的东西自带质检。你是团队里那个「有你在就不会翻车」的存在。",
+      blind:"对别人宽容容易，对自己却常常过于苛刻。满分交付的执念，有时让你迟迟不敢开始。",
+      advice:"把「完成」排在「完美」前面——先交出 80 分的成品，再留时间打磨。允许自己偶尔出格，羽毛乱一点也没关系。",
+      cp:9, cpText:"水豚人格（9号）——TA 的松弛感专治你的紧绷。学学水豚：事情没做好，天也不会塌。" },
+  2:{ name:"海豚人格", persona:"人形小太阳·金牌搭子", enne:"九型人格 · 2号 助人型/给予者", color:"#3f7fb5",
+      slogan:"「被需要，是我的充电方式。」",
+      tags:["共情力强","天生的照顾者","人缘极好","嘴硬心软"],
+      desc:"你是动物园里的<b>海豚表演担当</b>：永远第一个游过来打招呼，谁不开心就游到谁身边转圈圈。2号人格的你对他人的情绪有雷达般的感知，<b>帮上忙的瞬间你比谁都快乐</b>。只是有时候，你把自己排在了最后。",
+      strength:"超高情商与亲和力，能把陌生人处成朋友。你的存在本身就是团队的润滑剂和情绪补给站。",
+      blind:"习惯用「付出」换取「被爱」，不敢直接说出自己的需求。付出得不到回应时，委屈会悄悄累积。",
+      advice:"练习说这句魔法咒语：「这次换你来帮我。」健康的 2 号，是先把自己的氧气面罩戴好。",
+      cp:8, cpText:"狮子人格（8号）——TA 直接替你出头、把你的付出看在眼里。被 8 号罩着的 2 号，最有安全感。" },
+  3:{ name:"孔雀人格", persona:"人群中的 C 位担当", enne:"九型人格 · 3号 成就型/成就者", color:"#1f8f86",
+      slogan:"「低调？可以，但没必要。」",
+      tags:["目标感强","行动力爆表","形象管理大师","永远在线"],
+      desc:"你是动物园里的<b>孔雀馆门面</b>：一开屏就是全场焦点。3号人格的你像装了进度条——升职、考证、健身、副业，每个目标都要「完成 + 可展示」。你相信<b>被看见的努力才叫高光</b>。",
+      strength:"结果导向的超级执行者，适应力强、学什么都快。你能把普通的日子过出 KPI 式的上升曲线。",
+      blind:"太在意「看起来优秀」，容易把自我价值绑定在外部掌声上。停下来的时候，会有点不知道自己是谁。",
+      advice:"每周留一件「不为展示、只为自己」的小事。你的价值不在开屏的那一刻，而在你本身就是孔雀。",
+      cp:5, cpText:"猫头鹰人格（5号）——TA 不在乎你的高光，只在乎你这个人。在 TA 面前你可以卸下所有表演。" },
+  4:{ name:"火烈鸟人格", persona:"自带滤镜的艺术家", enne:"九型人格 · 4号 自我型/浪漫主义者", color:"#d4578f",
+      slogan:"「别人复刻不了我，这是我的骄傲，也是我的孤独。」",
+      tags:["审美在线","感受力细腻","独特感强","情绪深刻"],
+      desc:"你是动物园里的<b>火烈鸟展区</b>：在一群灰白鸟中，粉得理直气壮。4号人格的你对美、对情绪、对「意义」的感知比常人深一层，快乐和难过都自带<b>杜比全景声</b>。你不想活得「跟大家一样」。",
+      strength:"顶级的审美与创造力，共情深度无人能及。你总能说出别人「感受到了但说不出」的东西。",
+      blind:"容易在「没人懂我」的剧本里独自加戏，把缺失浪漫化，反而错过身边真实的爱。",
+      advice:"独特不需要通过缺席来证明。试着把情绪写成作品而不是心事——你的敏感，是你最好的生产力。",
+      cp:7, cpText:"猴子人格（7号）——TA 会不由分说把你拽出门快乐。猴子负责把你从情绪深海里捞上岸。" },
+  5:{ name:"猫头鹰人格", persona:"深夜出没的行走的百科全书", enne:"九型人格 · 5号 智慧型/观察者", color:"#8a6a45",
+      slogan:"「让我先观察一下，别催。」",
+      tags:["深度思考","边界感强","知识储备惊人","能量守恒大师"],
+      desc:"你是动物园里<b>白天装睡、夜里上岗</b>的猫头鹰：热闹是你们的，你只想观察。5号人格的你用「理解世界」来获得安全感，<b>知识就是你的电量</b>。社交可以，但要预约，且有时长上限。",
+      strength:"冷静、深刻、洞察力一流。所有人都在围观时，你已经看完了全局和底层逻辑。",
+      blind:"容易停留在「想清楚再行动」，用囤积知识代替体验生活。收集了一百份攻略，可能还没出门。",
+      advice:"把「再学一点」换成「先试 10 分钟」。行动会给你书本给不了的答案——而且你已经准备得够久了。",
+      cp:7, cpText:"猴子人格（7号）——TA 负责把你从思考的树洞里拽出来晒太阳。你的深度 + TA 的行动力 = 完美搭档。" },
+  6:{ name:"狐獴人格", persona:"全队最靠谱的哨兵", enne:"九型人格 · 6号 忠诚型/怀疑论者", color:"#9c7c3d",
+      slogan:"「我不是焦虑，我是有备无患。」",
+      tags:["风险预判","极度靠谱","忠诚度高","想得多但心软"],
+      desc:"你是动物园里的<b>狐獴家族哨兵</b>：别人晒太阳，你站岗。6号人格的你天生自带风险评估系统——出门查天气、合同逐行看、朋友聚餐先想好备选方案。<b>你的「多虑」，其实是在保护所有人</b>。",
+      strength:"忠诚度天花板，答应的事从不掉链子。你总能提前发现隐患，是团队里最值得托付后背的人。",
+      blind:"警报系统偶尔过载：把可能性当成必然性，用担忧消耗了本可以享受的当下。",
+      advice:"每次焦虑时问自己：「最坏结果发生的概率有多大？发生了我能怎么办？」想完这两句，就允许自己站下岗。",
+      cp:9, cpText:"水豚人格（9号）——TA 情绪稳如老狗的气场，能直接给你的警报系统物理降温。" },
+  7:{ name:"猴子人格", persona:"快乐永动机·气氛组组长", enne:"九型人格 · 7号 活跃型/乐观者", color:"#d97e26",
+      slogan:"「无聊，才是我唯一的天敌。」",
+      tags:["乐观 buff 拉满","点子王","社交 extroverted 天花板","怕被困住"],
+      desc:"你是动物园里的<b>猴山团宠</b>：从早到晚电量 100%，哪里有新鲜事哪里就有你。7号人格的你大脑像弹幕机——一个念头接一个念头，快乐是你的信仰，<b>计划表越满你越兴奋</b>。",
+      strength:"创造力与感染力双满格。你能把最普通的聚会变成难忘回忆，把最无聊的任务玩出新花样。",
+      blind:"兴趣来得快去得也快，容易被「下一个更好玩」勾走。很多开了头的事，缺一个 endings。",
+      advice:"挑一件让你眼睛发亮的事，给它三个月的专注。深挖一口井的快乐，比浅尝十个坑更持久。",
+      cp:5, cpText:"猫头鹰人格（5号）——TA 的沉静正好接住你的跳跃。TA 帮你沉淀，你帮 TA 出门。" },
+  8:{ name:"狮子人格", persona:"自带王座的天生领袖", enne:"九型人格 · 8号 领袖型/挑战者", color:"#c2631f",
+      slogan:"「有事冲我来。」",
+      tags:["气场两米八","保护欲强","果断直接","讨厌被控制"],
+      desc:"你是动物园里的<b>狮王本王</b>：走进场馆自带 BGM。8号人格的你信奉掌控与实力——不平事你第一个出头，亲近的人你全力罩着。<b>你的强硬是铠甲，你的柔软只给最信任的人</b>。",
+      strength:"决断力、担当、抗压能力全是顶配。混乱局面里，别人还在慌，你已经拍了板。",
+      blind:"习惯用强势保护自己，把「示弱」当成危险动作。久了，别人只看到你的力量，看不到你的累。",
+      advice:"对最信任的人练习说「我需要帮助」。真正的王者不是从不低头，而是知道哪颗头可以低。",
+      cp:2, cpText:"海豚人格（2号）——TA 看见你的柔软并真诚地心疼你；你替 TA 扫清外面的风雨。" },
+  9:{ name:"水豚人格", persona:"情绪稳定天花板·佛系顶流", enne:"九型人格 · 9号 和平型/调停者", color:"#7c9a5e",
+      slogan:"「都行，都可以，没关系的。」",
+      tags:["情绪稳定","松弛感本感","包容力强","全程在线"],
+      desc:"你是动物园里的<b>水豚区顶流</b>：头顶落只小鸟你都懒得动。9号人格的你天赋异禀——不内耗、不较劲、跟谁都能处。你是朋友圈里的<b>定海神针</b>，所有急脾气在你旁边都会自动降速。",
+      strength:"顶级的安全感制造机。你的包容让每个人在你身边都能卸下防备，冲突到你这里自动熄火。",
+      blind:"「都行」的背后，有时是「不想引起冲突」。长期忽略自己的偏好，容易活成别人期待的形状。",
+      advice:"每天练习一个小小的「我想要」。你的感受和别人的同样重要——水豚的松弛，也该留一份给自己。",
+      cp:1, cpText:"企鹅人格（1号）——TA 帮你把飘着的日子落地；你教会 TA：70 分的人生也很好。" }
+};
+const ENAME = {1:"完美型",2:"助人型",3:"成就型",4:"自我型",5:"智慧型",6:"忠诚型",7:"活跃型",8:"领袖型",9:"和平型"};
+/* 每只动物的专属 Emoji（狐獴、水豚无官方 emoji，用最近的"官方代餐"） */
+const EMOJI = {1:"🐧",2:"🐬",3:"🦚",4:"🦩",5:"🦉",6:"🐿️",7:"🐒",8:"🦁",9:"🦫"};
+/* 每只动物的专属海报主题色（背景渐变） */
+const THEME = {
+  1:["#e7edf7","#f6f9fd"], 2:["#dcEaf6","#f3f9fd"], 3:["#d9f2ef","#f2fbfa"],
+  4:["#fbe0ec","#fdf3f7"], 5:["#eadfd2","#f9f4ee"], 6:["#f2e6c8","#fbf6e6"],
+  7:["#fbe4c8","#fdf5ec"], 8:["#f9ddc8","#fdf1e8"], 9:["#dde9d4","#f4f9ef"]
+};
+
+/* ================= 题库（16题 · 行为情境题） ================= */
+const QUESTIONS = [
+  {q:"周五下班突然通知：全员放假三天！你的第一反应是", o:[
+    ["立刻把三天排成计划表，绝不能虚度",1],
+    ["先约人！没人陪的假期不完整",2],
+    ["正好冲一下这个月没拿下的目标",3],
+    ["太好了，我要和沙发锁死",9]]},
+  {q:"你在朋友眼中的隐藏属性是", o:[
+    ["情绪细腻的文艺担当",4],
+    ["冷静到底的军师 / 行走的百科全书",5],
+    ["气氛组永远的快乐源泉",7],
+    ["说一不二的行动派大哥 / 大姐",8]]},
+  {q:"同事把你的方案改得面目全非，你会", o:[
+    ["内心狂抓狂：这完全不符合标准！",1],
+    ["先怀疑是不是我自己哪里没做好",6],
+    ["表面微笑，内心已经写好一篇小作文",4],
+    ["行，那就看最后谁的版本被采纳",3]]},
+  {q:"朋友半夜 emo 找你倾诉，你的反应是", o:[
+    ["帮 TA 理性分析，直接给解决方案",5],
+    ["陪着聊到 TA 睡着，情绪先接住再说",2],
+    ["讲段子逗 TA 笑，快乐是最好的稀释剂",7],
+    ["直接问是谁惹的？我去解决",8]]},
+  {q:"面对一只突然凑近的流浪猫，你会", o:[
+    ["慢慢蹲下来，安安静静陪着它",9],
+    ["先观察周围安不安全，再靠近",6],
+    ["顺手查一下科学的投喂方式",1],
+    ["上头！立刻想给它取十个名字",7]]},
+  {q:"团队比赛输了，你最在意的是", o:[
+    ["输可以，但不能输得难看",3],
+    ["没人看见我拼尽全力的样子",4],
+    ["配合不到位！下一把听我指挥",8],
+    ["大家情绪还好吗，可别互相埋怨",2]]},
+  {q:"你的手机相册里最多的是", o:[
+    ["截图和收藏的知识、资料",5],
+    ["随手拍的天空、路边的猫",9],
+    ["各种保单、合同、记录凭证",6],
+    ["探店、演出、和朋友的快乐瞬间",7]]},
+  {q:"如果给你一个超能力，你选", o:[
+    ["修正——把做错的事全部修正",1],
+    ["掌控——一切尽在掌握的感觉",8],
+    ["读心——这样就能帮到真正需要的人",2],
+    ["造梦——把脑海里的世界变成现实",4]]},
+  {q:"面对「人人都说好」的网红店，你会", o:[
+    ["去可以，但我要拍出比别人更好的照片",3],
+    ["先查真实评价，避开营销陷阱",5],
+    ["大家都想去我就去吧，都挺好",9],
+    ["会不会有坑？我先观望观望",6]]},
+  {q:"你处理「愤怒」的方式更接近", o:[
+    ["转移——找点好玩的事，情绪翻篇",7],
+    ["憋着——算了，TA 可能也不是故意的",2],
+    ["爆发——当场说清楚，绝不内耗",8],
+    ["冷却——等自己想通，再按原则处理",1]]},
+  {q:"你的理想生活画面是", o:[
+    ["一间看海的房间，自由而特别",4],
+    ["一群稳定可靠的老朋友，细水长流",6],
+    ["事业有成，朋友圈九宫格全是高光",3],
+    ["每天没什么大事发生，就很幸福",9]]},
+  {q:"学习一件新东西时，你倾向于", o:[
+    ["先把底层逻辑搞懂再动手",5],
+    ["直接上手玩，边玩边学",7],
+    ["找最标准的方法论，一步步来",1],
+    ["找人一起学，互相鼓励才坚持得下去",2]]},
+  {q:"你的购物车里，最近加购的是", o:[
+    ["提升实力的大件（设备 / 装备 / 课程）",8],
+    ["不买也行、买了开心的东西",9],
+    ["设计独特、绝不撞款的小物",4],
+    ["实用刚需，或补充家庭库存",6]]},
+  {q:"朋友给你起了个外号，你觉得", o:[
+    ["那必须响亮，最好人尽皆知",3],
+    ["起外号也要讲究基本准确性吧",1],
+    ["好玩！那我再给你们一人起一个",7],
+    ["无所谓，名字只是个代号",5]]},
+  {q:"在团队里，大家最可能给你的评价是", o:[
+    ["有你在就特别安心，被照顾得很好",2],
+    ["最靠谱，说好的事从不掉链子",6],
+    ["脾气超好，跟 TA 吵架都吵不起来",9],
+    ["果断，关键时刻一定站出来",8]]},
+  {q:"深夜刷到一句「你已经在很努力了」，你会", o:[
+    ["有点想哭，感觉被看穿了",4],
+    ["哈哈转给朋友：快看，这说的不是我",7],
+    ["截图收藏，这就是我的精神股东语录",3],
+    ["冷静点赞，但不太需要这种安慰",5]]},
+  {q:"搬进新家的第一件事，你会", o:[
+    ["先把收纳和动线规划好，一切归位才安心",1],
+    ["给朋友发新地址，喊大家来暖居",2],
+    ["先装氛围灯——这个家的灵魂是色调",4],
+    ["先测网速和采光，研究小区及周边配套",5]]},
+  {q:"公司年会临时拉你上台，你会", o:[
+    ["没问题，正好给全场整个活",3],
+    ["提前把发言稿写好背熟才敢上",6],
+    ["拿过话筒就控场，完全不怯场",8],
+    ["能躲就躲，我在台下负责鼓掌就好",9]]},
+  {q:"你更愿意住在", o:[
+    ["窗明几净、物品各就各位的家",1],
+    ["图书馆 / 书店旁边的安静小屋",5],
+    ["楼下就是夜市和游乐场的热闹街区",7],
+    ["有落地窗和晚霞的老洋房",4]]},
+  {q:"朋友借钱迟迟不还，你会", o:[
+    ["不好意思催，怕伤感情",2],
+    ["算了算了，就当请 TA 吃饭了",9],
+    ["记在小本本上，找机会旁敲侧击",6],
+    ["直接开口：什么时候还？",8]]},
+  {q:"项目群里的新任务，你通常会", o:[
+    ["主动认领，并定好完成时间",1],
+    ["挑最出彩的那部分做",3],
+    ["先研究任务背景，想清楚再接",5],
+    ["有人安排就行，我配合",9]]},
+  {q:"你的旅行风格更接近", o:[
+    ["以同行的人玩得开心为第一",2],
+    ["为一家书店 / 一片海专门去一座城",4],
+    ["行程拉满，特种兵式打卡",7],
+    ["攻略做三份，退路都想好了",6]]},
+  {q:"你眼中的「理想约会」是", o:[
+    ["提前订好餐厅，流程清晰不踩坑",1],
+    ["直球式：喜欢就直说，去看展吧",8],
+    ["一起逛博物馆，边看边聊",5],
+    ["在家点外卖看电影，舒服最重要",9]]},
+  {q:"朋友圈里你的角色更像", o:[
+    ["热搜制造机，动态自带流量",3],
+    ["约局发起人，永远有新玩法",7],
+    ["群消息置顶的那个人，谁有事都找你",6],
+    ["评论区永远有你的暖心回复",2]]},
+  {q:"如果可以立刻掌握一项技能，你选", o:[
+    ["时间管理——让生活分秒不差",1],
+    ["艺术创作——把感受画出来",4],
+    ["演讲号召——一呼百应",8],
+    ["躺平体质——躺着也有收入",9]]},
+  {q:"你的购物习惯是", o:[
+    ["给家人朋友买东西比给自己还积极",2],
+    ["理性比价，只为真正的需求买单",5],
+    ["愿意为「看起来很贵气」的体验付费",3],
+    ["直播间一激动就下单",7]]},
+  {q:"下雨的周末，你会", o:[
+    ["把家里来个大扫除，顺便整理衣柜",1],
+    ["泡茶追剧，安心宅家不出门",6],
+    ["躺着听雨声，发呆一下午",9],
+    ["写点心情文字，给雨天配个歌单",4]]},
+  {q:"聚餐点菜时，你通常是", o:[
+    ["直接拍板：就这几个，不够再加",8],
+    ["先问每个人的忌口，再统筹",2],
+    ["查好评分排行榜，按口碑点",5],
+    ["点几道颜值担当，拍照好看为先",3]]},
+  {q:"面对突然的变故（比如裁员传闻），你的反应是", o:[
+    ["立刻复盘手头工作，做到无可挑剔",1],
+    ["天塌下来先吃顿好的，车到山前必有路",7],
+    ["第一时间更新简历，找好备选方案",6],
+    ["先 emo 一晚上，明天再想办法",4]]},
+  {q:"你的社交能量状态是", o:[
+    ["大部分时间佛系，谁约都行、不约也行",9],
+    ["按需社交，对「有用」的关系更上心",3],
+    ["朋友的事就是我的事",2],
+    ["只带节奏，不跟节奏",8]]},
+  {q:"看到别人做得比你好，你会", o:[
+    ["冷静研究 TA 是怎么做到的",5],
+    ["欣赏，但更珍惜自己的节奏",6],
+    ["暗暗较劲，给自己立下新标准",1],
+    ["哇好厉害！立刻想一起玩",7]]},
+  {q:"你给自己的「人生关键词」更接近", o:[
+    ["出人头地，活成样板",3],
+    ["活出自我，不负感受",4],
+    ["掌控命运，绝不服输",8],
+    ["及时行乐，体验优先",7]]}
+];
+
+/* ================= 开始页轨道动物（9 只动物全部有专属 emoji） ================= */
+const ORBIT_EMOJI = Object.values(EMOJI);
+(function buildOrbit(){
+  const orbit = document.getElementById("orbit");
+  const n = ORBIT_EMOJI.length;
+  ORBIT_EMOJI.forEach((e,i)=>{
+    const s = document.createElement("span");
+    s.textContent = e;
+    const a = (i/n)*Math.PI*2;
+    s.style.left = (115 + 100*Math.cos(a) - 26) + "px";
+    s.style.top  = (115 + 100*Math.sin(a) - 26) + "px";
+    orbit.appendChild(s);
+  });
+})();
+
+/* ================= 测验逻辑 ================= */
+let idx = 0, tally = {};
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+function startQuiz(){ idx=0; tally={}; renderQ(); show("screen-quiz"); }
+function renderQ(){
+  const q = QUESTIONS[idx];
+  document.getElementById("qno").textContent = (idx+1)+" / "+QUESTIONS.length;
+  document.getElementById("bar-fill").style.width = (idx/QUESTIONS.length*100)+"%";
+  const qt = document.getElementById("qtext");
+  qt.style.animation="none"; void qt.offsetWidth; qt.style.animation="";
+  qt.textContent = q.q;
+  const box = document.getElementById("opts");
+  box.innerHTML = "";
+  q.o.forEach((op,i)=>{
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.innerHTML = `<span class="key">${"ABCD"[i]}</span>${op[0]}`;
+    b.onclick = ()=>{
+      tally[op[1]] = (tally[op[1]]||0)+1;
+      idx++;
+      if(idx < QUESTIONS.length){ renderQ(); }
+      else { showResult(); }
+    };
+    box.appendChild(b);
+  });
+}
+
+/* ================= 结果页 ================= */
+let curType = 9, subType = 1;
+function showResult(){
+  document.getElementById("bar-fill").style.width = "100%";
+  const entries = Object.entries(tally).sort((a,b)=>b[1]-a[1]);
+  curType = +entries[0][0];
+  subType = +entries[1][0];
+  renderResult(curType, subType);
+}
+function renderResult(t, st){
+  curType = t; subType = st;
+  const r = RESULTS[t];
+  document.getElementById("r-avatar").innerHTML = ANIMAL_SVG[t];
+  document.getElementById("r-name").textContent = EMOJI[t] + " " + r.name;
+  document.getElementById("r-persona").textContent = r.persona;
+  document.getElementById("r-enne").innerHTML = `${EMOJI[t]} ${r.enne}`;
+  document.getElementById("r-slogan").textContent = r.slogan;
+  document.getElementById("r-tags").innerHTML = r.tags.map(x=>`<span class="tag"># ${x}</span>`).join("");
+  document.getElementById("r-desc").innerHTML = r.desc;
+  document.getElementById("r-strength").innerHTML = r.strength;
+  document.getElementById("r-blind").innerHTML = r.blind;
+  document.getElementById("r-advice").innerHTML = r.advice;
+  document.getElementById("r-cp-avatar").innerHTML = ANIMAL_SVG[r.cp];
+  document.getElementById("r-cp").innerHTML = `<b>${EMOJI[r.cp]} ${RESULTS[r.cp].name}</b>（${ENAME[r.cp]}）<br>${r.cpText}`;
+  document.getElementById("r-sub").innerHTML =
+    `你的第二主导是 <b>${EMOJI[st]} ${RESULTS[st].name}</b>（${ENAME[st]}）。<br>` +
+    `当你放松下来，会悄悄冒出 TA 的样子——这是你性格里的隐藏彩蛋。`;
+  show("screen-result");
+}
+/* 封面九宫格 */
+(function buildCover(){
+  const grid = document.getElementById("cover-grid");
+  if(!grid) return;
+  for(let t=1;t<=9;t++){
+    const d = document.createElement("div");
+    d.className = "cover-cell";
+    d.innerHTML = `${ANIMAL_SVG[t]}<div class="cn">${RESULTS[t].name.replace("人格","")}</div><div class="ce">${EMOJI[t]}</div>`;
+    grid.appendChild(d);
+  }
+})();
+/* 素材/演示路由：?demo=cover | quiz | result&type=9 */
+(function demoRouter(){
+  const p = new URLSearchParams(location.search);
+  if(p.has("shot")) document.body.classList.add("shot");
+  const d = p.get("demo");
+  if(d === "cover"){ show("screen-cover"); }
+  else if(d === "quiz"){ startQuiz(); }
+  else if(d === "result"){
+    const t = Math.min(9, Math.max(1, +(p.get("type") || 9)));
+    renderResult(t, t===9?1:(t%9)+1);
+  }
+})();
+
+/* ================= 海报生成（Canvas，纯本地） ================= */
+function svgToImage(svgStr){
+  return new Promise(res=>{
+    const blob = new Blob([svgStr], {type:"image/svg+xml"});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = ()=>{ URL.revokeObjectURL(url); res(img); };
+    img.src = url;
+  });
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+async function savePoster(){
+  const r = RESULTS[curType];
+  const c = document.getElementById("poster");
+  const ctx = c.getContext("2d");
+  const W = c.width, H = c.height;
+  /* 每只动物专属背景渐变 */
+  const th = THEME[curType];
+  const g = ctx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,th[0]); g.addColorStop(1,th[1]);
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  /* 专属 emoji 水印 */
+  ctx.save();
+  ctx.globalAlpha = 0.16;
+  ctx.font = "170px serif";
+  ctx.fillText(EMOJI[curType], 610, 220);
+  ctx.font = "120px serif";
+  ctx.fillText(EMOJI[curType], 90, 1540);
+  ctx.restore();
+  /* 主卡 */
+  ctx.fillStyle = "#ffffff";
+  roundRect(ctx,50,110,800,1380,48); ctx.fill();
+  /* 顶部色带（动物专属主题色） */
+  ctx.fillStyle = r.color;
+  roundRect(ctx,50,110,800,150,48); ctx.fill();
+  ctx.fillRect(50,210,800,50);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 52px 'PingFang SC','Microsoft YaHei',sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("动物园九型人格测试", W/2, 200);
+  /* 动物头像 */
+  const img = await svgToImage(ANIMAL_SVG[curType]);
+  ctx.fillStyle = "#f7e8d4";
+  ctx.beginPath(); ctx.arc(W/2, 430, 160, 0, Math.PI*2); ctx.fill();
+  ctx.drawImage(img, W/2-130, 300, 260, 260);
+  /* emoji 徽章（头像右下角） */
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath(); ctx.arc(W/2+118, 548, 42, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = r.color; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.arc(W/2+118, 548, 42, 0, Math.PI*2); ctx.stroke();
+  ctx.font = "46px serif";
+  ctx.textAlign = "center";
+  ctx.fillText(EMOJI[curType], W/2+118, 563);
+  /* 名称与身份 */
+  ctx.fillStyle = "#3a2f28";
+  ctx.font = "900 64px 'PingFang SC','Microsoft YaHei',sans-serif";
+  ctx.fillText(EMOJI[curType] + " " + r.name, W/2, 650);
+  ctx.fillStyle = "#b06a2c";
+  ctx.font = "bold 40px 'PingFang SC','Microsoft YaHei',sans-serif";
+  ctx.fillText(r.persona, W/2, 715);
+  /* 九型徽章 */
+  ctx.strokeStyle = "#eadcce"; ctx.lineWidth = 3;
+  roundRect(ctx, W/2-230, 750, 460, 70, 35); ctx.stroke();
+  ctx.fillStyle = "#6f5c4a";
+  ctx.font = "30px 'PingFang SC','Microsoft YaHei',sans-serif";
+  ctx.fillText(r.enne, W/2, 796);
+  /* slogan */
+  ctx.fillStyle = "#3a2f28";
+  ctx.font = "bold 36px 'PingFang SC','Microsoft YaHei',sans-serif";
+  wrapText(ctx, r.slogan, W/2, 890, 700, 56);
+  /* 标签 */
+  let tx = W/2 - (r.tags.length*180)/2 + 90;
+  ctx.font = "28px 'PingFang SC','Microsoft YaHei',sans-serif";
+  r.tags.forEach(t=>{
+    const w = ctx.measureText("# "+t).width + 44;
+    ctx.fillStyle = "#fff4e6";
+    roundRect(ctx, tx-  w/2 + 45, 970, w, 56, 28); ctx.fill();
+    ctx.fillStyle = "#a35f22";
+    ctx.fillText("# "+t, tx + 45, 1008);
+    tx += 180;
+  });
+  /* 天赋 */
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#b06a2c"; ctx.font = "bold 34px 'PingFang SC',sans-serif";
+  ctx.fillText("✨ 天赋高光", 120, 1120);
+  ctx.fillStyle = "#5c4d40"; ctx.font = "30px 'PingFang SC',sans-serif";
+  wrapText(ctx, r.strength, 120, 1170, 660, 46, "left");
+  /* 盲点 */
+  ctx.fillStyle = "#b06a2c"; ctx.font = "bold 34px 'PingFang SC',sans-serif";
+  ctx.fillText("🌀 隐藏盲点", 120, 1330);
+  ctx.fillStyle = "#5c4d40"; ctx.font = "30px 'PingFang SC',sans-serif";
+  wrapText(ctx, r.blind, 120, 1380, 660, 46, "left");
+  /* 底部 */
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#a8988a"; ctx.font = "26px 'PingFang SC',sans-serif";
+  ctx.fillText("你是动物园里的谁？快来测测你的动物人格 🦓", W/2, 1480);
+  /* 导出 */
+  const link = document.createElement("a");
+  link.download = `动物园九型人格-${r.name}.png`;
+  link.href = c.toDataURL("image/png");
+  link.click();
+}
+function wrapText(ctx, text, x, y, maxW, lineH, align="center"){
+  ctx.textAlign = align;
+  let line = "", yy = y;
+  for(const ch of text){
+    if(ctx.measureText(line + ch).width > maxW){ ctx.fillText(line, x, yy); line = ch; yy += lineH; }
+    else line += ch;
+  }
+  if(line) ctx.fillText(line, x, yy);
+}
+</script>
+</body>
+</html>
